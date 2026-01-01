@@ -27,14 +27,14 @@ curl -SL -o "${DOCKER_COMPOSE_BIN}" "${DOCKER_COMPOSE_URL}"
 chmod +x    "${DOCKER_COMPOSE_BIN}"
 ```
 
-
-### Add user to docker group to avoid using sudo in docker command
+### docker_conf (user)
 ```
+#Add user to docker group to avoid using sudo in docker command
 sudo usermod -aG docker ${USER} # add user to docker group to avoid using sudo in docker command
 ```
 
 
-### Remark the (hani_nw_200) was create by command :   
+### docker network 
 ```
 docker network create --subnet=192.168.200.0/24 hani_nw_200
 ```
