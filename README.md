@@ -9,8 +9,27 @@ AWS
 
 ## TIPS
 
+
+
+### docker_install
+```
+dnf install -y docker 
+```
+
+### docker_install_compose_plugin 
+```
+DOCKER_COMPOSE_DIR='/usr/libexec/docker/cli-plugins'
+DOCKER_COMPOSE_BIN="${DOCKER_COMPOSE_DIR}/docker-compose"
+DOCKER_COMPOSE_URL='https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-linux-x86_64'
+
+mkdir -pv   "${DOCKER_COMPOSE_DIR}"
+curl -SL -o "${DOCKER_COMPOSE_BIN}" "${DOCKER_COMPOSE_URL}"
+chmod +x    "${DOCKER_COMPOSE_BIN}"
+```
+
+
 ### Add user to docker group to avoid using sudo in docker command
-```bash
+```
 sudo usermod -aG docker ${USER} # add user to docker group to avoid using sudo in docker command
 ```
 
