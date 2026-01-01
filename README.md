@@ -10,7 +10,7 @@ AWS
 ## TIPS
 
 ### Add user to docker group to avoid using sudo in docker command
-```
+```bash
 sudo usermod -aG docker ${USER} # add user to docker group to avoid using sudo in docker command
 ```
 
