@@ -1,0 +1,77 @@
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [Dockerfile:Dockerfile_opensuse_ssh]                 ::2025_12_31::
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+ARG IMAGE_SOURCE=opensuse/leap:15.6
+ARG USERNAME=uid1000
+ARG PASSWORD=132b345fg8
+ARG USERKEY='ssh-rsa AAA1Ut9w== key_uid_1000'
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+FROM --platform=linux/amd64 ${IMAGE_SOURCE}
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+##
+#
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [packages install] 
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+RUN zypper refresh && zypper update && zypper install -y openssh iputils wget git sudo iproute2 nano
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+##
+#
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [packages clean] 
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+RUN rm -rf /var/cache/*
+
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+##
+#
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [ssh conf] 
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_dsa_key -N ''
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_ed25519_key -N ''
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_ecdsa_key -N ''
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [users] 
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+RUN echo "root:${PASSWORD}" | chpasswd
+
+RUN useradd -m -d /home/${USERNAME} -s /bin/bash -g root -u 1000 ${USERNAME}
+
+RUN echo "${USERNAME}:${PASSWORD}"  | chpasswd
+ 
+RUN echo "${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/${USERNAME}_CONF 
+
+RUN mkdir -p       /home/${USERNAME}/.ssh 
+
+RUN echo ${USERKEY}  >> /home/${USERNAME}/.ssh/authorized_keys
+
+RUN chown -R ${USERNAME} /home/${USERNAME}/.ssh
+
+RUN chmod 700      /home/${USERNAME}/.ssh
+
+RUN chmod 400      /home/${USERNAME}/.ssh/authorized_keys
+
+RUN touch "/passwd_is_${PASSWORD}" "/root/passwd_is_${PASSWORD}" "/home/${USERNAME}/passwd_is_${PASSWORD}"
+
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#
+##
+#
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# : [entrypoint] 
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
+
+# :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#docker run -p 22156:22 --name opensusessh31 -it opensusessh:15.6 "/usr/sbin/sshd" "-D"
+

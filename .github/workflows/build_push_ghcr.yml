@@ -1,0 +1,134 @@
+name: DOCKER_IMAGE_BUILD_PUSH_GHCR
+
+
+
+
+on:
+  push:
+    branches: [ main123 ]
+  workflow_dispatch: # manual trigger
+    inputs:
+
+     DOCKER_DIR: 
+      description: 'Enter Docker folder.'
+      default: 'busybox_dynamic_httpd'
+      required: false
+      
+     DOCKER_FILE: 
+      description: 'Enter Dockerfile.'
+      default: 'Dockerfile'
+      required: false
+
+     IMAGE_NAME: 
+      description: 'Enter Image Name'
+      default: 'busybox_dynamic_httpd'
+      required: false
+
+     IMAGE_TAG: 
+      description: 'Enter Image Tag'
+      default: '2901'
+      required: false
+          
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # Required to push to GHCR
+
+
+    steps:
+
+      # Step 1: Set the Environment Variable
+      - name: Set Environment Variable for Image Tag
+        run: |
+          D_USER="${{ vars.DOCKERHUB_USERNAME }}"
+          G_USER="${{ github.repository_owner }}"
+          I_NAME=${{ github.event.inputs.IMAGE_NAME }}   
+          I_TAG=${{ github.event.inputs.IMAGE_TAG }}   
+          echo "IMAGE_NAME=$I_NAME" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$I_TAG" >> $GITHUB_ENV
+          echo "D_IMAGE_USER_NAME_TAG=$D_USER/$I_NAME:$I_TAG" >> $GITHUB_ENV
+          echo "D_IMAGE_USER_NAME_LATEST=$D_USER/$I_NAME:latest" >> $GITHUB_ENV
+          echo "D_IMAGE_LINK=https://hub.docker.com/r/${D_USER}/${I_NAME}" >> $GITHUB_ENV
+          echo "G_IMAGE_USER_NAME_TAG=ghcr.io/$(echo $G_USER | tr '[:upper:]' '[:lower:]')/$I_NAME:$I_TAG" >> $GITHUB_ENV
+          echo "G_IMAGE_USER_NAME_LATEST=ghcr.io/$(echo $G_USER | tr '[:upper:]' '[:lower:]')/$I_NAME:latest" >> $GITHUB_ENV
+          echo "G_IMAGE_LINK=https://github.com/${{ github.repository_owner }}/$(basename ${{ github.repository }})/pkgs/container/${I_NAME}" >> $GITHUB_ENV          
+          echo "EMAIL_LOG_LINK=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ github.event.inputs.DOCKER_DIR }}   
+          file: ${{ github.event.inputs.DOCKER_DIR }}/${{ github.event.inputs.DOCKER_FILE }}   
+          push: true
+          tags: |
+            ${{ env.G_IMAGE_USER_NAME_TAG }}
+            ${{ env.G_IMAGE_USER_NAME_LATEST }}
+
+
+
+      - name: Log Docker Pull Command
+        run: |
+          echo "Successfully pushed image."
+          echo "docker pull ${{ env.G_IMAGE_USER_NAME_TAG }}"
+          echo
+          echo "Docker Hub URL:"
+          echo ${{ env.G_IMAGE_LINK }}
+
+#
+#----------------------------------------------------------------------
+      - name: SET_FAILED_TASK
+        id:   SET_FAILED_TASK
+        if: failure()
+        env:
+         NOTIFICATION_STATUS: "FAILED"
+        run: |
+         echo "NOTIFICATION_STATUS=FAILED" >> $GITHUB_ENV
+#---------------------------------------------------------------------- #
+#
+## 
+#
+#----------------------------------------------------------------------
+      - name: SET_SUCCESSFUL_TASK
+        id:   SET_SUCCESSFUL_TASK
+        if: success()
+        env:
+         NOTIFICATION_STATUS: "OK"
+        run: |
+         echo "NOTIFICATION_STATUS=OK" >> $GITHUB_ENV
+#---------------------------------------------------------------------- #
+#
+## 
+#
+#----------------------------------------------------------------------  
+      - name: SENDING_NOTIFICATIONS_EMAIL_USING_RESEND_COM
+        if:  always()
+        id:   SENDING_NOTIFICATIONS_EMAIL_USING_RESEND_COM
+        env:
+         RESEND_API_URL: ${{ vars.RESEND_API_URL }}
+         RESEND_API_H_AUTH: ${{ secrets.RESEND_API_H_AUTH }}
+         EMAIL_FROM: ${{ secrets.NOTIFICATIONS_EMAIL_FROM }}
+         EMAIL_TO: ${{ secrets.NOTIFICATIONS_EMAIL_TO }}
+         NOTIFICATION_IMAGE_LINK: ${{ env.G_IMAGE_LINK }}
+         NOTIFICATION_IMAGE_USER_NAME_TAG: ${{ env.G_IMAGE_USER_NAME_TAG }}
+        run: |
+         chmod +x notifications_email_using_resend_com.sh 
+         source   notifications_email_using_resend_com.sh
+#---------------------------------------------------------------------- 
+#
+## 
+#

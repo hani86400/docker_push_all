@@ -1,0 +1,13 @@
+name: SHOW_ENVIRONMENT_VARIABLES
+on:
+  workflow_dispatch:
+
+jobs:
+ JOB_NO_1:
+  name: job_no_1_show_environment_variables
+  runs-on: ubuntu-latest
+  steps:
+
+      - name: steps_show_environment_variables
+        run: env | sort 
+

@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+
+  bb_httpd_1:
+    image: hani86400/busybox-httpd-env:1222
+    container_name:  bb_httpd_1
+    ports:
+      - "3001:3000"
+    environment:
+      HTML_INDEX_TITLE: "By_server_1"
+      HTML_INDEX_APP: "WEB_SITE"
+      HTML_INDEX_SERVER_ID: "1"
+
+  bb_httpd_2:
+    image: hani86400/busybox-httpd-env:1222
+    container_name:  bb_httpd_2
+    ports:
+      - "3002:3000"
+    environment:
+      HTML_INDEX_TITLE: "By_server_2"
+      HTML_INDEX_APP: "WEB_SITE"
+      HTML_INDEX_SERVER_ID: "2"
+
+  bb_httpd_3:
+    image: hani86400/busybox-httpd-env:1222
+    container_name:  bb_httpd_3
+    ports:
+      - "3003:3000"
+    environment:
+      HTML_INDEX_TITLE: "By_server_3"
+      HTML_INDEX_APP: "WEB_SITE"
+      HTML_INDEX_SERVER_ID: "3"      
