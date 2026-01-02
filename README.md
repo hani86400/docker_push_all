@@ -180,6 +180,10 @@ dc_exec_m2_mongoexport() { docker exec -i  mongodb2 mongoexport --db=mycompany -
 
 dc_run_opensusessh() { docker run -p 22156:22 --name opensusessh31 -it opensusessh:15.6 "/usr/sbin/sshd" "-D" ; }
 
+dc_run_bb1() { docker run -d --name bb_httpd_1 -p 3001:3000 -e HTML_INDEX_TITLE="By_server_1" -e HTML_INDEX_APP="WEB_SITE" -e HTML_INDEX_SERVER_ID="1"  hani86400/busybox-httpd-env:1222 ; }
+dc_run_bb2() { docker run -d --name bb_httpd_2 -p 3002:3000 -e HTML_INDEX_TITLE="By_server_2" -e HTML_INDEX_APP="WEB_SITE" -e HTML_INDEX_SERVER_ID="2"  hani86400/busybox-httpd-env:1222 ; }
+dc_run_bb3() { docker run -d --name bb_httpd_3 -p 3003:3000 -e HTML_INDEX_TITLE="By_server_3" -e HTML_INDEX_APP="WEB_SITE" -e HTML_INDEX_SERVER_ID="3"  hani86400/busybox-httpd-env:1222 ; }
+
 
 #######################################################################
 # f u n c t i o n                                       [2025_03_07 ] #
@@ -221,6 +225,7 @@ dc_run_opensusessh() { docker run -p 22156:22 --name opensusessh31 -it opensuses
 } # f u n c t i o n [END] #############################################
 
 
+
 ```
-###### 2026_01_01
+###### 2026_01_02
 
