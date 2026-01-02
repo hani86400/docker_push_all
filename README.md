@@ -39,6 +39,35 @@ sudo usermod -aG docker ${USER} # add user to docker group to avoid using sudo i
 docker network create --subnet=192.168.200.0/24 hani_nw_200
 ```
 
+### docker pull 
+```
+docker pull busybox:1.37.0-uclibc
+```
+
+### docker build 
+```
+docker buildx install
+docker buildx create --use
+export DOCKER_BUILDKIT=1
+DOCKER_BUILDKIT=1 docker build . 
+
+
+cd $CONTEXT_DIR
+docker build . --no-cache -f "${DOCKER_FILE}" -t "${IMAGE_TAG}"
+```
+
+### docker compose 
+```
+cd $DC_DIR # folder contains .env file
+docker compose -f dc_pmassh7 up
+docker compose -f dc_pmassh7 up -d
+docker compose -f dc_pmassh7 sown
+```
+
+### docker run 
+```
+docker run -d --name bb_httpd_1 -p 3001:3000 -e HTML_INDEX_TITLE="By_server_1" -e HTML_INDEX_APP="WEB_SITE" -e HTML_INDEX_SERVER_ID="1"  hani86400/busybox-httpd-env:1222
+```
 
 ### commit changes on container 
 ##### STEP_01: run docker image
